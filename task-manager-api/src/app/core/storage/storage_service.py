@@ -32,3 +32,8 @@ class GCSStorageService:
             content_type=content_type,
         )
         return url
+
+    def download_file(self, path: str, f):
+        bucket: Bucket = self.gcs_client.bucket(self.gcs_cfg.bucket)
+        blob = bucket.blob(path)
+        blob.download_to_file(f)

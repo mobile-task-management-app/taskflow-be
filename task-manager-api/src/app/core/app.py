@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -24,10 +25,12 @@ async def lifespan(app: FastAPI):
     db = await init_db_pool(cfg.db)
     logger = init_logger(cfg.logger)
     gcs_client = initialize_gcs_client()
-    server = Server(db, cfg, logger, gcs_client)
+    background_executor = ThreadPoolExecutor(max_workers=10)
+    server = Server(db, cfg, logger, gcs_client, background_executor)
     app.state.server = server
     yield
     await db.close()
+    background_executor.shutdown(wait=True)
 
 
 def create_app() -> FastAPI:

@@ -1,8 +1,5 @@
 from dataclasses import dataclass
-
 import bcrypt
-
-from app.modules.auth.api.schemas.sign_up_schema import SignUpRequestSchema
 from app.modules.auth.services.dtos.oauth2_google_dto import GoogleUserInfo
 from app.modules.auth.services.dtos.sign_up_dto import SignUpInputDTO
 

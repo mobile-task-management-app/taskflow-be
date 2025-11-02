@@ -21,6 +21,14 @@ class ProjectExceptionType(Enum):
         "message": "logo extension not allowed",
         "status": 400,
     }
+    USER_NOT_BELONG_TO_PROJECT = {
+        "message": "user not belong to project",
+        "status": 403,
+    }
+    USER_PROJECT_PERMISSION_DENIED = {
+        "message": "user have no permission for {action}, user role: {role}",
+        "status": 403,
+    }
 
 
 class ProjectException(AppException):
