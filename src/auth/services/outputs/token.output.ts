@@ -1,7 +1,7 @@
-export class Token {
+export class TokenOutput {
   accessToken: string;
   refreshToken: string;
-  constructor(args: Partial<Token>) {
+  constructor(args: Partial<TokenOutput>) {
     Object.assign(this, args);
   }
 }

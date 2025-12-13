@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty, IsString, IsDate } from 'class-validator';
 import { Expose, Transform } from 'class-transformer';
+import { SignUpInput } from '../services/inputs/sign_up.input';
 
 export class SignUpRequestDTO {
   @Expose({ name: 'email' })
@@ -34,12 +35,10 @@ export class SignUpRequestDTO {
     toClassOnly: true,
   })
   dateOfBirth: Date;
-}
 
-export class SignUpResponseDTO {
-  @Expose({ name: 'access_token' })
-  accessToken: string;
-
-  @Expose({ name: 'refresh_token' })
-  refreshToken: string;
+  toSignUpInput(): SignUpInput {
+    return new SignUpInput({
+      ...this,
+    });
+  }
 }

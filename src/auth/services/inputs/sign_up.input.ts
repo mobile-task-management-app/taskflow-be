@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { CreateUserConfirmSignUp } from 'src/auth/models/create_user_confirm_sign_up';
 
-export class SignUpCommand {
+export class SignUpInput {
   email: string;
   password: string;
   firstName: string;
@@ -9,6 +9,9 @@ export class SignUpCommand {
   phoneNumber: string;
   dateOfBirth: Date;
 
+  constructor(args: Partial<SignUpInput>) {
+    Object.assign(this, args);
+  }
   toCreateUSerConfirmSignUp(args: {
     otp: string;
     expireAfter: number;

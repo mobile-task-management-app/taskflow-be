@@ -2,11 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserRepository } from 'src/users/repositories/user.repository';
 import { MailService } from 'src/mail/services/mail.service';
-import { SignUpCommand } from './commands/sign_up.command';
 import { randomInt } from 'crypto';
 import { UserConfirmSignRepository } from '../repositories/user_confirm_sign_up.repository';
 import { SignUpVerification } from 'src/mail/models/sign_up_verfication';
-import { Token } from '../models/token';
 import { CreateUser } from 'src/users/models/create_user';
 import { PgService } from 'src/common/pg/pg.service';
 import { PoolClient } from 'pg';
@@ -14,6 +12,8 @@ import { AccessTokenPayload } from '../models/access_token_payload';
 import { RefreshTokenPayload } from '../models/refresh_token_payload';
 import { ConfigService } from '@nestjs/config';
 import { instanceToPlain } from 'class-transformer';
+import { SignUpInput } from './inputs/sign_up.input';
+import { TokenOutput } from './outputs/token.output';
 
 @Injectable()
 export class AuthService {
@@ -52,13 +52,13 @@ export class AuthService {
 
     return token;
   }
-  async signUp(command: SignUpCommand) {
-    const existUser = await this.userRepo.findUserByEmail(command.email);
+  async signUp(input: SignUpInput) {
+    const existUser = await this.userRepo.findUserByEmail(input.email);
     if (existUser) {
       throw new HttpException('user email exist', HttpStatus.BAD_REQUEST);
     }
     const otp = this.genOtp();
-    const createUserConfirm = command.toCreateUSerConfirmSignUp({
+    const createUserConfirm = input.toCreateUSerConfirmSignUp({
       otp,
       expireAfter: 5 * 60 * 1000,
     });
@@ -74,7 +74,7 @@ export class AuthService {
       signUpVerification,
     );
   }
-  async verifyOtp(otp: string): Promise<Token> {
+  async verifyOtp(otp: string): Promise<TokenOutput> {
     const userConfirm = await this.userConfirmRepo.findByOtp(otp);
     if (!userConfirm) {
       throw new HttpException('otp invalid', HttpStatus.BAD_REQUEST);
@@ -105,7 +105,7 @@ export class AuthService {
         this.configService.getOrThrow('jwt.refreshToken.expiresIn'),
       ),
     ]);
-    return new Token({
+    return new TokenOutput({
       accessToken,
       refreshToken,
     });
