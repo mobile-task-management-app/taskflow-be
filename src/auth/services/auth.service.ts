@@ -96,13 +96,13 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.genToken(
         new AccessTokenPayload({ userId: user.id }),
-        this.configService.getOrThrow('jwt.accessToken.secret'),
-        this.configService.getOrThrow('jwt.accessToken.expiresIn'),
+        this.configService.get('jwt.accessToken.secret')!,
+        this.configService.get('jwt.accessToken.expiresIn')!,
       ),
       this.genToken(
         new RefreshTokenPayload({ userId: user.id }),
-        this.configService.getOrThrow('jwt.refreshToken.secret'),
-        this.configService.getOrThrow('jwt.refreshToken.expiresIn'),
+        this.configService.get('jwt.refreshToken.secret')!,
+        this.configService.get('jwt.refreshToken.expiresIn')!,
       ),
     ]);
     return new TokenOutput({

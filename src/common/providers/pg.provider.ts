@@ -14,7 +14,9 @@ export const PgProvider: Provider = {
       user: configService.get<string>('db.user', { infer: true }),
       password: configService.get<string>('db.password', { infer: true }),
       database: configService.get<string>('db.name', { infer: true }),
-
+      ssl: {
+        rejectUnauthorized: true,
+      },
       max: configService.get<number>('db.pool.max', 10),
       idleTimeoutMillis: configService.get<number>(
         'db.pool.idleTimeout',

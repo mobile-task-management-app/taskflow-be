@@ -1,3 +1,3 @@
 export interface UserContextType {
-  id: string;
+  id: number;
 }

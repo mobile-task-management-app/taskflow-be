@@ -21,6 +21,7 @@ import { PgService } from './pg/pg.service';
     }),
   ],
   providers: [
+    PgProvider,
     PgService,
     JwtStrategy,
     {
@@ -39,7 +40,7 @@ import { PgService } from './pg/pg.service';
     },
     { provide: APP_INTERCEPTOR, useClass: TransformResponseInterceptor },
   ],
-  exports: [PgProvider, JwtStrategy, PgService],
+  exports: [PG_POOL_PROVIDER, JwtStrategy, PgService],
 })
 export class CommonModule implements OnModuleDestroy {
   constructor(
