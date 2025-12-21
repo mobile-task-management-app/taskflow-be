@@ -22,4 +22,7 @@ export class User extends BaseModel {
 
   @Expose({ name: 'last_login_at' })
   lastLoginAt: Date;
+
+  @Expose({ name: 'current_refresh_token' })
+  currentRefreshToken: string;
 }

@@ -12,7 +12,7 @@ export class SignUpInput {
   constructor(args: Partial<SignUpInput>) {
     Object.assign(this, args);
   }
-  toCreateUSerConfirmSignUp(args: {
+  toCreateUserConfirmSignUp(args: {
     otp: string;
     expireAfter: number;
   }): CreateUserConfirmSignUp {

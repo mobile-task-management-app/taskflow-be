@@ -28,7 +28,6 @@ import { PgService } from './pg/pg.service';
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-
     {
       provide: APP_FILTER,
       useClass: AllExceptionFilter,

@@ -11,11 +11,13 @@ import {
   getAppResponseSchema,
   RegisterAppResponseModels,
 } from 'src/common/utils/swagger.util';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Post('/sign-up')
   @ApiBody({ type: SignUpRequestDTO })
   @ApiOkResponse({ type: AppResponseDTO })
@@ -28,6 +30,8 @@ export class AuthController {
       data: null,
     });
   }
+
+  @Public()
   @Post('/verify-otp')
   @ApiBody({ type: VerifyOtpRequestDTO })
   @RegisterAppResponseModels(VerifyOtpResponseDTO)

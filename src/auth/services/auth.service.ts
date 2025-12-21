@@ -58,7 +58,7 @@ export class AuthService {
       throw new HttpException('user email exist', HttpStatus.BAD_REQUEST);
     }
     const otp = this.genOtp();
-    const createUserConfirm = input.toCreateUSerConfirmSignUp({
+    const createUserConfirm = input.toCreateUserConfirmSignUp({
       otp,
       expireAfter: 5 * 60 * 1000,
     });
@@ -79,6 +79,11 @@ export class AuthService {
     if (!userConfirm) {
       throw new HttpException('otp invalid', HttpStatus.BAD_REQUEST);
     }
+    const now = new Date();
+    if (userConfirm.expireAt <= now) {
+      throw new HttpException('OTP expired', HttpStatus.BAD_REQUEST);
+    }
+
     const createUser = new CreateUser({
       firstName: userConfirm.firstName,
       lastName: userConfirm.lastName,
@@ -88,23 +93,29 @@ export class AuthService {
       dateOfBirth: userConfirm.dateOfBirth,
     });
     const callback = async (client: PoolClient) => {
-      const user = await this.userRepo.createUser(createUser, client);
+      let user = await this.userRepo.createUser(createUser, client);
       await this.userConfirmRepo.deleteByOtp(otp, client);
-      return user;
+      const [accessToken, refreshToken] = await Promise.all([
+        this.genToken(
+          new AccessTokenPayload({ userId: user.id }),
+          this.configService.get('jwt.accessToken.secret')!,
+          this.configService.get('jwt.accessToken.expiresIn')!,
+        ),
+        this.genToken(
+          new RefreshTokenPayload({ userId: user.id }),
+          this.configService.get<string>('jwt.refreshToken.secret')!,
+          this.configService.get<number>('jwt.refreshToken.expiresIn')!,
+        ),
+      ]);
+      await this.userRepo.updateCurrentRefreshTokenByUserId(
+        user.id,
+        refreshToken,
+        client,
+      );
+      return [accessToken, refreshToken];
     };
-    const user = await this.pgService.executeTransaction(callback);
-    const [accessToken, refreshToken] = await Promise.all([
-      this.genToken(
-        new AccessTokenPayload({ userId: user.id }),
-        this.configService.get('jwt.accessToken.secret')!,
-        this.configService.get('jwt.accessToken.expiresIn')!,
-      ),
-      this.genToken(
-        new RefreshTokenPayload({ userId: user.id }),
-        this.configService.get('jwt.refreshToken.secret')!,
-        this.configService.get('jwt.refreshToken.expiresIn')!,
-      ),
-    ]);
+    const [accessToken, refreshToken] =
+      await this.pgService.executeTransaction(callback);
     return new TokenOutput({
       accessToken,
       refreshToken,

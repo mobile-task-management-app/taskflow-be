@@ -26,7 +26,7 @@ export class AllExceptionFilter implements ExceptionFilter {
 
     const errorResponse = new AppResponseDTO({
       success: false,
-      message,
+      message: 'Internal error',
       data: null,
     });
     return response.status(status).json(errorResponse);

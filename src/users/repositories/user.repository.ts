@@ -32,6 +32,7 @@ export class UserRepository {
         phone_number,
         date_of_birth,
         last_login_at,
+        current_refresh_token,
         created_at,
         updated_at
     `;
@@ -65,6 +66,7 @@ export class UserRepository {
         phone_number,
         date_of_birth,
         last_login_at,
+        current_refresh_token,
         created_at,
         updated_at
       FROM users
@@ -94,6 +96,7 @@ export class UserRepository {
         phone_number,
         date_of_birth,
         last_login_at,
+        current_refresh_token,
         created_at,
         updated_at
       FROM users
@@ -110,5 +113,22 @@ export class UserRepository {
     return plainToInstance(User, rows[0], {
       excludeExtraneousValues: true,
     });
+  }
+  async updateCurrentRefreshTokenByUserId(
+    userId: number,
+    currentRefreshToken: string,
+    client?: PoolClient,
+  ) {
+    const sql = `
+      UPDATE users
+      SET
+        current_refresh_token = $2,
+        updated_at = NOW()
+      WHERE 1=1 
+      AND id=$1
+    `;
+
+    const executor = client ?? this.pgPool;
+    await executor.query(sql, [userId, currentRefreshToken]);
   }
 }
