@@ -37,4 +37,11 @@ export default () => ({
       ), // 7 days
     },
   },
+  s3: {
+    region: process.env.S3_REGION ?? 'us-west-004',
+    endpoint: process.env.S3_ENDPOINT,
+    accessKey: process.env.S3_ACCESS_KEY,
+    secretKey: process.env.S3_SECRET_KEY,
+    bucket: process.env.S3_BUCKET_NAME,
+  },
 });

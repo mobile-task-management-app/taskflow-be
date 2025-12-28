@@ -7,6 +7,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { MailModule } from './mail/mail.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { LoggerMiddleware } from './common/middlewares/logger.middleware';
     ProjectsModule,
     TasksModule,
     MailModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [],

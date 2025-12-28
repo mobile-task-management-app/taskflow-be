@@ -171,7 +171,6 @@ export class ProjectRepository {
       WHERE ${whereClause}
       ORDER BY ${cond.sort} ${cond.asc ? 'ASC' : 'DESC'}
     `;
-    console.log(args);
     const { rows } = await this.pgPool.query(sql, [...args]);
     return plainToInstance(Project, rows, {
       excludeExtraneousValues: true,
