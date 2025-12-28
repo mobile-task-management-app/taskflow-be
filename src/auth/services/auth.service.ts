@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { instanceToPlain } from 'class-transformer';
 import { SignUpInput } from './inputs/sign_up.input';
 import { TokenOutput } from './outputs/token.output';
+import { LogInInput } from './inputs/login.input';
 
 @Injectable()
 export class AuthService {
@@ -119,6 +120,42 @@ export class AuthService {
     return new TokenOutput({
       accessToken,
       refreshToken,
+    });
+  }
+
+  async logIn(input: LogInInput): Promise<TokenOutput> {
+    const user = await this.userRepo.findUserByEmail(input.email);
+    if (!user) {
+      throw new HttpException(
+        'invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    if (!(await user.verifyPassword(input.password))) {
+      throw new HttpException(
+        'invalid email or password',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+    const [accessToken, refreshToken] = await Promise.all([
+      this.genToken(
+        new AccessTokenPayload({ userId: user.id }),
+        this.configService.get('jwt.accessToken.secret')!,
+        this.configService.get('jwt.accessToken.expiresIn')!,
+      ),
+      this.genToken(
+        new RefreshTokenPayload({ userId: user.id }),
+        this.configService.get<string>('jwt.refreshToken.secret')!,
+        this.configService.get<number>('jwt.refreshToken.expiresIn')!,
+      ),
+    ]);
+    await this.userRepo.updateCurrentRefreshTokenByUserId(
+      user.id,
+      refreshToken,
+    );
+    return new TokenOutput({
+      accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   }
 }

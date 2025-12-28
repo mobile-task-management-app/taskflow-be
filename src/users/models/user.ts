@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { BaseModel } from 'src/common/models/base_model';
+import * as bcrypt from 'bcrypt';
 
 export class User extends BaseModel {
   @Expose({ name: 'first_name' })
@@ -25,4 +26,12 @@ export class User extends BaseModel {
 
   @Expose({ name: 'current_refresh_token' })
   currentRefreshToken: string;
+
+  async verifyPassword(password: string): Promise<boolean> {
+    if (!this.password) {
+      return false;
+    }
+    // bcrypt.compare(plainText, hash)
+    return bcrypt.compare(password, this.password);
+  }
 }
