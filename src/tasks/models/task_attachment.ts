@@ -2,6 +2,9 @@ import { Expose } from 'class-transformer';
 import * as mime from 'mime-types';
 
 export class TaskAttachment {
+  @Expose()
+  id: number;
+
   @Expose({ name: 'storage_key' })
   storageKey: string;
 

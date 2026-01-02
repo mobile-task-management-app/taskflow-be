@@ -100,7 +100,6 @@ export class ProjectRepository {
     if (!setClause) {
       return this.findProjectById(id);
     }
-
     const sql = `
     UPDATE projects
     SET 

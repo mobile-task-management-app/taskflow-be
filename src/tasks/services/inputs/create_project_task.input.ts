@@ -23,10 +23,11 @@ export class CreateProjectTaskInput {
     Object.assign(this, args);
   }
 
-  toCreateTask(): CreateTask {
+  toCreateTask(ownerId: number): CreateTask {
     return new CreateTask({
       ...this,
       attachments: [],
+      ownerId,
     });
   }
 }

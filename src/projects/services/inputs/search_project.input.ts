@@ -1,23 +1,25 @@
-import { Expose, Transform } from 'class-transformer';
+import {
+  PGFilterMetaData,
+  type PGQueryValue,
+} from 'src/common/queries/pg.query';
 import { ProjectStatus } from 'src/projects/models/project_status';
-import { type PGQueryValue } from 'src/common/queries/pg.query';
-import { parseRangeInput } from 'src/common/utils/queries.util';
 
 export class SearchProjectInput {
-  @Expose()
+  @PGFilterMetaData({ column: 'status' })
   status?: ProjectStatus;
 
-  @Expose({ name: 'start_date' })
+  @PGFilterMetaData({ column: 'start_date' })
   startDate?: PGQueryValue<Date>;
 
-  @Expose({ name: 'end_date' })
+  @PGFilterMetaData({ column: 'end_date' })
   endDate?: PGQueryValue<Date>;
 
-  @Expose({ name: 'owner_id' })
+  @PGFilterMetaData({ column: 'owner_id' })
   ownerId?: number;
 
+  // Sort and Asc are used for ORDER BY logic,
+  // not the WHERE clause, so they usually don't need PG metadata.
   sort: string;
-
   asc: boolean;
 
   constructor(args: Partial<SearchProjectInput>) {

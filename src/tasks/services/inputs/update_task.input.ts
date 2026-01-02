@@ -1,30 +1,27 @@
-import { PGMetaData } from 'src/common/queries/pg.query';
 import { TaskPriority } from 'src/tasks/models/task_priority';
 import { TaskStatus } from 'src/tasks/models/task_status';
+import { UpdateTask } from 'src/tasks/models/update_task';
 
-export class UpdateTask {
-  @PGMetaData({})
+export class UpdateTaskInput {
+  id: number;
   title?: string;
 
-  @PGMetaData({})
   status?: TaskStatus;
 
-  @PGMetaData({})
   priority?: TaskPriority;
 
-  @PGMetaData({ column: 'category_ids' })
   categoryIds?: number[];
 
-  @PGMetaData({ column: 'start_date' })
   startDate?: Date;
 
-  @PGMetaData({ column: 'end_date' })
   endDate?: Date;
 
-  @PGMetaData({})
   description?: string;
 
-  constructor(args: Partial<UpdateTask>) {
+  constructor(args: Partial<UpdateTaskInput>) {
     Object.assign(this, args);
+  }
+  toUpdateTask() {
+    return new UpdateTask(this);
   }
 }

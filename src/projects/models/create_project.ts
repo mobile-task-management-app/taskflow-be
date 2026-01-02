@@ -1,23 +1,23 @@
-import { Expose } from 'class-transformer';
 import { ProjectStatus } from './project_status';
+import { PGMetaData } from 'src/common/queries/pg.query';
 
 export class CreateProject {
-  @Expose()
+  @PGMetaData({})
   name: string;
 
-  @Expose({ name: 'owner_id' })
+  @PGMetaData({ column: 'owner_id' })
   ownerId: number;
 
-  @Expose()
+  @PGMetaData({})
   status: ProjectStatus;
 
-  @Expose()
+  @PGMetaData({})
   description?: string;
 
-  @Expose({ name: 'start_date' })
+  @PGMetaData({ column: 'start_date' })
   startDate?: Date;
 
-  @Expose({ name: 'end_date' })
+  @PGMetaData({ column: 'end_date' })
   endDate?: Date;
 
   constructor(args: Partial<CreateProject>) {

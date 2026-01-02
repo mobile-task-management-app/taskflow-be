@@ -5,9 +5,14 @@ import { PG_POOL_PROVIDER } from 'src/common/providers/pg.provider';
 import { Task } from '../models/task';
 import { TaskStatus } from '../models/task_status';
 
-import { buildUpdateSetClause } from 'src/common/utils/pg.utils';
+import {
+  buildPGFilterCondition,
+  buildUpdateSetClause,
+} from 'src/common/utils/pg.utils';
 import { CreateTask } from '../models/create_task';
 import { UpdateTask } from '../models/update_task';
+import { SearchProjectTaskInput } from '../services/inputs/search_project_task.input';
+import { TaskAttachment } from '../models/task_attachment';
 
 @Injectable()
 export class TaskRepository {
@@ -19,6 +24,7 @@ export class TaskRepository {
   async createTask(taskData: CreateTask, client?: PoolClient): Promise<Task> {
     const sql = `
       INSERT INTO tasks (
+        owner_id,
         project_id,
         title,
         description,
@@ -29,14 +35,15 @@ export class TaskRepository {
         start_date,
         end_date
       )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING
-        id, project_id, title, description, status, 
+        id, owner_id, project_id, title, description, status, 
         priority, category_ids, attachments, 
         start_date, end_date, created_at, updated_at
     `;
 
     const params = [
+      taskData.ownerId,
       taskData.projectId,
       taskData.title,
       taskData.description,
@@ -60,6 +67,7 @@ export class TaskRepository {
     const sql = `
       SELECT
           id
+        , owner_id
         , project_id
         , title
         , description
@@ -85,30 +93,19 @@ export class TaskRepository {
     });
   }
 
-  async updateTask(
+  async updateTaskAttachments(
     id: number,
-    updateData: UpdateTask,
+    attachments: TaskAttachment[],
     client?: PoolClient,
   ): Promise<Task | null> {
-    // Transform class to plain to handle snake_case keys for the utility
-    const plainUpdate = instanceToPlain(updateData);
-
-    // Convert arrays to strings if they exist in the update payload
-    if (plainUpdate.attachments)
-      plainUpdate.attachments = JSON.stringify(plainUpdate.attachments);
-    if (plainUpdate.category_ids)
-      plainUpdate.category_ids = JSON.stringify(plainUpdate.category_ids);
-
-    const [setClause, params] = buildUpdateSetClause(plainUpdate, 2);
-
-    if (!setClause) return this.findTaskById(id);
-
+    const rawAttachments = JSON.stringify(instanceToPlain(attachments));
     const sql = `
       UPDATE tasks
-      SET ${setClause}, updated_at = NOW()
+      SET attachments = $2, updated_at = NOW()
       WHERE id = $1
       RETURNING 
         id
+      , owner_id
       , project_id
       , title
       , description
@@ -123,7 +120,7 @@ export class TaskRepository {
     `;
 
     const executor = client ?? this.pgPool;
-    const { rows } = await executor.query(sql, [id, ...params]);
+    const { rows } = await executor.query(sql, [id, rawAttachments]);
 
     if (rows.length === 0) return null;
 
@@ -137,5 +134,78 @@ export class TaskRepository {
     const executor = client ?? this.pgPool;
     const result = await executor.query(sql, [id]);
     return (result.rowCount ?? 0) > 0;
+  }
+
+  async searchProjectTask(cond: SearchProjectTaskInput): Promise<Task[]> {
+    const [whereClause, args] = buildPGFilterCondition(cond);
+
+    const sql = `
+    SELECT
+      id,
+      owner_id,
+      title,
+      project_id AS project_id,
+      status,
+      priority,
+      category_ids AS category_ids,
+      attachments,
+      description,
+      start_date AS start_date,
+      end_date AS end_date,
+      created_at,
+      updated_at
+    FROM tasks
+    WHERE ${whereClause}
+    ORDER BY ${cond.sort || 'created_at'} ${cond.asc ? 'ASC' : 'DESC'}
+  `;
+
+    // 3. Thực thi query
+    const { rows } = await this.pgPool.query(sql, [...args]);
+
+    // 4. Transform từ plain object sang class instance
+    return plainToInstance(Task, rows, {
+      excludeExtraneousValues: true,
+    });
+  }
+  async updateTask(
+    taskId: number,
+    updateData: UpdateTask,
+    client?: PoolClient,
+  ): Promise<Task> {
+    // 1. Generate the SET clause. We start at $2 because $1 is reserved for taskId.
+    const [setClause, params] = buildUpdateSetClause(updateData, 2);
+
+    // 2. If no fields were provided for update, just return the existing task
+
+    const sql = `
+    UPDATE tasks
+    SET 
+      ${setClause},
+      updated_at = NOW()
+    WHERE id = $1
+    RETURNING
+      id,
+      owner_id,
+      title,
+      description,
+      priority,
+      status,
+      category_ids,
+      start_date,
+      end_date,
+      project_id,
+      created_at,
+      updated_at
+  `;
+
+    const executor = client ?? this.pgPool;
+
+    // 3. Execute query with taskId as $1 and the rest of the params following
+    const { rows } = await executor.query(sql, [taskId, ...params]);
+
+    // 4. Transform the database row back into a Task class instance
+    return plainToInstance(Task, rows[0], {
+      excludeExtraneousValues: true,
+    });
   }
 }

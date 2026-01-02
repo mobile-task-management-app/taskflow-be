@@ -5,6 +5,8 @@ import { TaskAttachment } from './task_attachment';
 export class CreateTask {
   title: string;
 
+  ownerId: number;
+
   projectId: number;
 
   status: TaskStatus;

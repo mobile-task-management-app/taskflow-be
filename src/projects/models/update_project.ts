@@ -1,9 +1,26 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateProject } from './create_project';
+import { PGMetaData } from 'src/common/queries/pg.query';
+import { ProjectStatus } from './project_status';
 
-export class UpdateProject extends PartialType(CreateProject) {
+export class UpdateProject {
+  @PGMetaData({})
+  name?: string;
+
+  @PGMetaData({ column: 'owner_id' })
+  ownerId?: number;
+
+  @PGMetaData({})
+  status?: ProjectStatus;
+
+  @PGMetaData({})
+  description?: string;
+
+  @PGMetaData({ column: 'start_date' })
+  startDate?: Date;
+
+  @PGMetaData({ column: 'end_date' })
+  endDate?: Date;
+
   constructor(args: Partial<UpdateProject>) {
-    super();
     Object.assign(this, args);
   }
 }

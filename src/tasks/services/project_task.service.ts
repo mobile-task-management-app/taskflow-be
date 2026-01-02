@@ -10,6 +10,7 @@ import { Task } from '../models/task';
 import { PgService } from 'src/common/pg/pg.service';
 import { S3StorageService } from 'src/storage/services/s3_storage.service';
 import { TaskAttachmentsUploadOutput } from './outputs/task_attachments_upload.output';
+import { SearchProjectTaskInput } from './inputs/search_project_task.input';
 
 @Injectable()
 export class ProjectTaskService {
@@ -33,7 +34,7 @@ export class ProjectTaskService {
     }
     const callback = async (client: PoolClient) => {
       //create task
-      const createTask = input.toCreateTask();
+      const createTask = input.toCreateTask(user.id);
       const newTask = await this.taskRepo.createTask(createTask, client);
       //create attachment for task
       if (input.attachments.length === 0) {
@@ -41,16 +42,11 @@ export class ProjectTaskService {
       }
 
       const attachments = input.attachments.map((attachment, idx) =>
-        attachment.toAttachment(
-          `tasks/${newTask.id}/attachments/${idx}/${newTask.id}_${idx}`,
-        ),
+        attachment.toAttachment(newTask.id, idx),
       );
-      const updateTaskAttachments = new UpdateTask({
-        attachments,
-      });
-      const updatedTask = (await this.taskRepo.updateTask(
+      const updatedTask = (await this.taskRepo.updateTaskAttachments(
         newTask.id,
-        updateTaskAttachments,
+        attachments,
         client,
       )) as Task;
       return updatedTask;
@@ -69,5 +65,20 @@ export class ProjectTaskService {
       ...newTask,
       attachmentUrls: urls,
     });
+  }
+
+  async searchProjectTask(
+    input: SearchProjectTaskInput,
+    user: UserContextType,
+  ): Promise<TaskOutput[]> {
+    const project = await this.projectRepo.findProjectById(input.projectId);
+    if (!project) {
+      throw new HttpException('project not found', HttpStatus.NOT_FOUND);
+    }
+    if (project.ownerId !== user.id) {
+      throw new HttpException('permission denied', HttpStatus.FORBIDDEN);
+    }
+    const tasks = await this.taskRepo.searchProjectTask(input);
+    return tasks.map((task) => new TaskOutput(task));
   }
 }

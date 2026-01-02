@@ -7,6 +7,9 @@ export class TaskResponseDTO {
   @Expose()
   id: number;
 
+  @Expose({ name: 'owner_id' })
+  ownerId: number;
+
   @Expose()
   title: string;
 
@@ -59,5 +62,14 @@ export class TaskResponseDTO {
 
   constructor(args: Partial<TaskResponseDTO>) {
     Object.assign(this, args);
+    this.attachments = args.attachments!.map(
+      (attachment) =>
+        new TaskAttachmentResponseDTO({
+          id: attachment.id,
+          name: attachment.name,
+          size: attachment.size,
+          extension: attachment.extension,
+        }),
+    );
   }
 }

@@ -8,6 +8,9 @@ export class Task extends BaseModel {
   @Expose()
   title: string;
 
+  @Expose({ name: 'owner_id' })
+  ownerId: number;
+
   @Expose({ name: 'project_id' })
   projectId: number;
 

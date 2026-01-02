@@ -1,19 +1,27 @@
-import { instanceToPlain } from 'class-transformer';
-
-import { PGQueryValue } from '../queries/pg.query';
+import {
+  PG_FILTER_METADATA,
+  PG_METADATA,
+  PGFilterMetaData,
+  PGMetaData,
+  PGQueryValue,
+} from '../queries/pg.query';
 
 export function buildPGFilterCondition(condition: any) {
-  const filter = instanceToPlain(condition, {
-    excludeExtraneousValues: true,
-  });
-
   const conditionList: string[] = ['1=1'];
   const args: any[] = [];
 
-  Object.entries(filter).forEach(([k, v]) => {
+  Object.entries(condition).forEach(([k, v]) => {
     // 1. Initial check: ignore undefined, null, or empty strings
     if (v === undefined || v === null || v === '') return;
-
+    const metaData: PGFilterMetaData = Reflect.getMetadata(
+      PG_FILTER_METADATA,
+      condition,
+      k,
+    );
+    if (!metaData) {
+      return;
+    }
+    const column = metaData.column || k;
     let finalValue: any;
     let operator: string = '='; // Default operator
 
@@ -42,24 +50,27 @@ export function buildPGFilterCondition(condition: any) {
 
     // 4. Build the condition
     args.push(finalValue);
-    conditionList.push(`${k} ${operator} $${args.length}`);
+    if (metaData.isArrayField) {
+      conditionList.push(`$${args.length} ${operator} ANY(${column})`);
+    } else {
+      conditionList.push(`${column} ${operator} $${args.length}`);
+    }
   });
 
   return [conditionList.join(' AND '), args];
 }
 
 export function buildUpdateSetClause(data: any, startAt = 1) {
-  const dataUpdate = instanceToPlain(data, {
-    excludeExtraneousValues: true,
-  });
-
   const setClause: string[] = [];
   const args: any[] = [];
-
-  Object.entries(dataUpdate).forEach(([k, v]) => {
+  Object.entries(data).forEach(([k, v]) => {
     if (v !== undefined && v !== null) {
+      const metaData: PGMetaData =
+        Reflect.getMetadata(PG_METADATA, data, k) || {};
       args.push(v);
-      setClause.push(`${k} = $${args.length + (startAt - 1)}`);
+      setClause.push(
+        `${metaData.column || k} = $${args.length + (startAt - 1)}`,
+      );
     }
   });
 

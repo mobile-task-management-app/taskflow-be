@@ -7,7 +7,6 @@ import {
   IsOptional,
   IsDate,
   ValidateNested,
-  ArrayNotEmpty,
   IsNumber,
 } from 'class-validator';
 import { TaskPriority } from '../models/task_priority';

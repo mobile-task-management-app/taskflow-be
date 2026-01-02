@@ -1,6 +1,6 @@
 import { BaseModel } from 'src/common/models/base_model';
 import { ProjectStatus } from './project_status';
-import { Expose, Transform, Type } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 
 export class Project extends BaseModel {
   @Expose()
