@@ -37,6 +37,7 @@ export class SignUpRequestDTO {
   @Expose({ name: 'date_of_birth' })
   @IsNotEmpty()
   @IsDate()
+  @ApiProperty({ name: 'date_of_birth', type: Number })
   @Transform(({ value }) => new Date(Number(value) * 1000), {
     toClassOnly: true,
   })

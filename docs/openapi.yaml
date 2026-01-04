@@ -9,6 +9,23 @@ paths:
           description: ''
       tags:
         - App
+  /api/v1/users/profile:
+    get:
+      operationId: UserController_getProfile
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/AppResponseDTO'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponseDTO'
+      tags:
+        - Users
   /api/v1/auth/sign-up:
     post:
       description: Creates a user account and triggers an OTP verification email/SMS.
@@ -421,6 +438,53 @@ tags: []
 servers: []
 components:
   schemas:
+    AppResponseDTO:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+      required:
+        - success
+        - message
+        - data
+    UserResponseDTO:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+          description: The unique identifier of the user
+        first_name:
+          type: string
+          example: John
+          description: The first name of the user
+        last_name:
+          type: string
+          example: Doe
+          description: The last name of the user
+        email:
+          type: string
+          example: john.doe@example.com
+          description: User email address
+        phone_number:
+          type: string
+          example: '+1234567890'
+          description: International phone number
+        last_login_at:
+          type: number
+          description: unix timestamp of the last successful login
+      required:
+        - id
+        - first_name
+        - last_name
+        - email
+        - phone_number
+        - last_login_at
     SignUpRequestDTO:
       type: object
       properties:
@@ -440,8 +504,7 @@ components:
           type: string
           example: '+1234567890'
         date_of_birth:
-          format: date-time
-          type: string
+          type: number
           example: 915148800
       required:
         - email
@@ -450,20 +513,6 @@ components:
         - last_name
         - phone_number
         - date_of_birth
-    AppResponseDTO:
-      type: object
-      properties:
-        success:
-          type: boolean
-        message:
-          type: string
-        data:
-          type: object
-          nullable: true
-      required:
-        - success
-        - message
-        - data
     TokenResponseDTO:
       type: object
       properties:
