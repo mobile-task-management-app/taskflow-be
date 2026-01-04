@@ -5,12 +5,11 @@ import { CreateProjectTaskInput } from './inputs/create_project_task.input';
 import { TaskOutput } from './outputs/task.output';
 import { UserContextType } from 'src/common/types/user_context.type';
 import { PoolClient } from 'pg';
-import { UpdateTask } from '../models/update_task';
 import { Task } from '../models/task';
 import { PgService } from 'src/common/pg/pg.service';
 import { S3StorageService } from 'src/storage/services/s3_storage.service';
-import { TaskAttachmentsUploadOutput } from './outputs/task_attachments_upload.output';
 import { SearchProjectTaskInput } from './inputs/search_project_task.input';
+import { TaskAttachmentOutput } from './outputs/task_attachment.output';
 
 @Injectable()
 export class ProjectTaskService {
@@ -52,18 +51,21 @@ export class ProjectTaskService {
       return updatedTask;
     };
     const newTask = await this.pgService.executeTransaction(callback);
-    // get presign url for attachment
-    const urls = await Promise.all(
-      newTask.attachments.map((attachment) =>
-        this.s3StorageService.getPresignedUploadUrl(
+    const attachments = await Promise.all(
+      newTask.attachments.map(async (attachment) => {
+        const uploadUrl = await this.s3StorageService.getPresignedUploadUrl(
           attachment.storageKey,
           attachment.getMimeType(),
-        ),
-      ),
+        );
+        return new TaskAttachmentOutput({
+          ...attachment,
+          uploadUrl,
+        });
+      }),
     );
-    return new TaskAttachmentsUploadOutput({
+    return new TaskOutput({
       ...newTask,
-      attachmentUrls: urls,
+      attachments,
     });
   }
 

@@ -41,7 +41,7 @@ async function bootstrap() {
 
   // Swagger setup
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('File Chat API')
+    .setTitle('TaskFlow Api')
     .setDescription('API description')
     .setVersion('1.0')
     .build();

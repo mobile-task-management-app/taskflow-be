@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'; // Added ApiOperation and ApiTags
 import { AuthService } from '../services/auth.service';
 import { SignUpRequestDTO } from '../dtos/sign_up.dto';
 import { AppResponseDTO } from 'src/common/dtos/app_response.dto';
 import { VerifyOtpRequestDTO } from '../dtos/verify_otp.dto';
-import { ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import {
   getAppResponseSchema,
   RegisterAppResponseModels,
@@ -12,12 +12,18 @@ import { Public } from 'src/common/decorators/public.decorator';
 import { TokenResponseDTO } from '../dtos/token.dto';
 import { LogInRequestDTO } from '../dtos/log_in.dto';
 
+@ApiTags('Authentication') // Groups all routes under "Authentication" in Swagger UI
 @Controller('/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Public()
   @Post('/sign-up')
+  @ApiOperation({
+    summary: 'Register a new user',
+    description:
+      'Creates a user account and triggers an OTP verification email/SMS.',
+  })
   @ApiBody({ type: SignUpRequestDTO })
   @ApiOkResponse({ type: AppResponseDTO })
   @HttpCode(HttpStatus.CREATED)
@@ -33,6 +39,11 @@ export class AuthController {
 
   @Public()
   @Post('/verify-otp')
+  @ApiOperation({
+    summary: 'Verify OTP code',
+    description:
+      'Validates the 6-digit code sent to the user and returns access tokens.',
+  })
   @ApiBody({ type: VerifyOtpRequestDTO })
   @RegisterAppResponseModels(TokenResponseDTO)
   @ApiOkResponse({
@@ -52,6 +63,11 @@ export class AuthController {
 
   @Public()
   @Post('/log-in')
+  @ApiOperation({
+    summary: 'User Login',
+    description:
+      'Authenticates user credentials and returns a JWT token if successful.',
+  })
   @ApiBody({ type: LogInRequestDTO })
   @RegisterAppResponseModels(TokenResponseDTO)
   @ApiOkResponse({

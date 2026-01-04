@@ -11,6 +11,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiOkResponse,
+  ApiBody,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { AddProjectRequestDTO } from '../dtos/add_project.dto';
 import { CurrentUserContext } from 'src/common/decorators/user_context.decorator';
 import type { UserContextType } from 'src/common/types/user_context.type';
@@ -22,11 +30,24 @@ import {
   SearchProjectResponseDTO,
 } from '../dtos/search_project.dto';
 import { ProjectResponseDTO } from '../dtos/project.dto';
+import {
+  getAppResponseSchema,
+  RegisterAppResponseModels,
+} from 'src/common/utils/swagger.util';
 
+@ApiTags('Projects')
+@ApiBearerAuth() // Indicates that JWT is required for these endpoints
 @Controller('/projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
+
   @Post('')
+  @ApiOperation({ summary: 'Create a new project' })
+  @ApiBody({ type: AddProjectRequestDTO })
+  @RegisterAppResponseModels(ProjectResponseDTO)
+  @ApiOkResponse({
+    schema: getAppResponseSchema(ProjectResponseDTO),
+  })
   @HttpCode(HttpStatus.CREATED)
   async addProject(
     @Body() dto: AddProjectRequestDTO,
@@ -42,8 +63,16 @@ export class ProjectController {
       data: new ProjectResponseDTO(output),
     });
   }
+
   @Patch('/:id')
-  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Update an existing project' })
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiBody({ type: UpdateProjectRequestDTO })
+  @RegisterAppResponseModels(ProjectResponseDTO)
+  @ApiOkResponse({
+    schema: getAppResponseSchema(ProjectResponseDTO),
+  })
+  @HttpCode(HttpStatus.OK) // Typically updates are OK (200) or No Content (204)
   async updateProject(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateProjectRequestDTO,
@@ -58,7 +87,14 @@ export class ProjectController {
       data: new ProjectResponseDTO(output),
     });
   }
+
   @Get('/:id')
+  @ApiOperation({ summary: 'Get project details by ID' })
+  @ApiParam({ name: 'id', type: 'number' })
+  @RegisterAppResponseModels(ProjectResponseDTO)
+  @ApiOkResponse({
+    schema: getAppResponseSchema(ProjectResponseDTO),
+  })
   @HttpCode(HttpStatus.OK)
   async getProjectById(
     @Param('id', ParseIntPipe) id: number,
@@ -67,12 +103,17 @@ export class ProjectController {
     const output = await this.projectService.getProjectById(id, user);
     return new AppResponseDTO({
       success: true,
-      message: 'update project success',
+      message: 'get project success',
       data: new ProjectResponseDTO(output),
     });
   }
 
   @Get('')
+  @ApiOperation({ summary: 'Search and filter projects' })
+  @RegisterAppResponseModels(SearchProjectResponseDTO)
+  @ApiOkResponse({
+    schema: getAppResponseSchema(SearchProjectResponseDTO),
+  })
   @HttpCode(HttpStatus.OK)
   async searchProject(
     @Query() dto: SearchProjectRequestDTO,
@@ -90,8 +131,12 @@ export class ProjectController {
       }),
     });
   }
+
   @Delete('/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a project' })
+  @ApiParam({ name: 'id', type: 'number' })
+  @ApiOkResponse({ type: AppResponseDTO })
+  @HttpCode(HttpStatus.OK) // If returning a message, use OK. If returning nothing, use NO_CONTENT
   async deleteProject(
     @Param('id', ParseIntPipe) id: number,
     @CurrentUserContext() user: UserContextType,

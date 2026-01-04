@@ -4,9 +4,8 @@ import { UpdateTaskInput } from './inputs/update_task.input';
 import { UserContextType } from 'src/common/types/user_context.type';
 import { TaskOutput } from './outputs/task.output';
 import { BulkAddTaskAttachmentInput } from './inputs/bulk_add_task_attachments.input';
-import { TaskAttachment } from '../models/task_attachment';
 import { S3StorageService } from 'src/storage/services/s3_storage.service';
-import { TaskAttachmentsUploadOutput } from './outputs/task_attachments_upload.output';
+import { TaskAttachmentOutput } from './outputs/task_attachment.output';
 
 @Injectable()
 export class TaskService {
@@ -59,19 +58,24 @@ export class TaskService {
       ...task.attachments,
       ...newAttachments,
     ]);
-    const urls = await Promise.all(
-      newAttachments.map((attachment) =>
-        this.s3StorageService.getPresignedUploadUrl(
+    const attachments = await Promise.all(
+      newAttachments.map(async (attachment) => {
+        const uploadUrl = await this.s3StorageService.getPresignedUploadUrl(
           attachment.storageKey,
           attachment.getMimeType(),
-        ),
-      ),
+        );
+        return new TaskAttachmentOutput({
+          ...attachment,
+          uploadUrl,
+        });
+      }),
     );
-    return new TaskAttachmentsUploadOutput({
+    return new TaskOutput({
       ...newTasks,
-      attachmentUrls: urls,
+      attachments,
     });
   }
+
   async getTaskById(id: number, user: UserContextType): Promise<TaskOutput> {
     const task = await this.taskRepo.findTaskById(id);
     if (!task) {
@@ -80,6 +84,20 @@ export class TaskService {
     if (task.ownerId !== user.id) {
       throw new HttpException('permission denied', HttpStatus.FORBIDDEN);
     }
-    return new TaskOutput(task);
+    const attachments = await Promise.all(
+      task.attachments.map(async (attachment) => {
+        const downloadUrl = await this.s3StorageService.getPresignedDownloadUrl(
+          attachment.storageKey,
+        );
+        return new TaskAttachmentOutput({
+          ...attachment,
+          downloadUrl,
+        });
+      }),
+    );
+    return new TaskOutput({
+      ...task,
+      attachments,
+    });
   }
 }

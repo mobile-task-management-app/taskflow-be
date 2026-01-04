@@ -4,6 +4,8 @@ import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectsCommand,
+  DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { ConfigService } from '@nestjs/config';
@@ -54,5 +56,33 @@ export class S3StorageService {
     });
 
     return getSignedUrl(this.s3Client, command, { expiresIn });
+  }
+  /**
+   * Deletes an object from the S3 bucket
+   * @param key The storage key (path) of the object to delete
+   */
+  async deleteObject(key: string): Promise<void> {
+    const command = new DeleteObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    await this.s3Client.send(command);
+  }
+
+  /**
+   * Optional: Delete multiple objects at once (Batch Delete)
+   * @param keys Array of storage keys to delete
+   */
+  async deleteMultipleObjects(keys: string[]): Promise<void> {
+    const command = new DeleteObjectsCommand({
+      Bucket: this.bucketName,
+      Delete: {
+        Objects: keys.map((key) => ({ Key: key })),
+        Quiet: true, // If true, S3 won't return a result for every successful delete
+      },
+    });
+
+    await this.s3Client.send(command);
   }
 }

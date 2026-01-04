@@ -63,13 +63,7 @@ export class TaskResponseDTO {
   constructor(args: Partial<TaskResponseDTO>) {
     Object.assign(this, args);
     this.attachments = args.attachments!.map(
-      (attachment) =>
-        new TaskAttachmentResponseDTO({
-          id: attachment.id,
-          name: attachment.name,
-          size: attachment.size,
-          extension: attachment.extension,
-        }),
+      (attachment) => new TaskAttachmentResponseDTO(attachment),
     );
   }
 }

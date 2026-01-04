@@ -1,0 +1,787 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "operationId": "AppController_health",
+        "parameters": [],
+        "responses": { "200": { "description": "" } },
+        "tags": ["App"]
+      }
+    },
+    "/api/v1/auth/sign-up": {
+      "post": {
+        "description": "Creates a user account and triggers an OTP verification email/SMS.",
+        "operationId": "AuthController_signUp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/SignUpRequestDTO" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AppResponseDTO" }
+              }
+            }
+          }
+        },
+        "summary": "Register a new user",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/verify-otp": {
+      "post": {
+        "description": "Validates the 6-digit code sent to the user and returns access tokens.",
+        "operationId": "AuthController_verifyOtp",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VerifyOtpRequestDTO" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TokenResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "Verify OTP code",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/auth/log-in": {
+      "post": {
+        "description": "Authenticates user credentials and returns a JWT token if successful.",
+        "operationId": "AuthController_logIn",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LogInRequestDTO" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TokenResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "summary": "User Login",
+        "tags": ["Authentication"]
+      }
+    },
+    "/api/v1/projects": {
+      "post": {
+        "operationId": "ProjectController_addProject",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AddProjectRequestDTO" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Create a new project",
+        "tags": ["Projects"]
+      },
+      "get": {
+        "operationId": "ProjectController_searchProject",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter projects by their current status",
+            "schema": {
+              "type": "string",
+              "enum": ["NOT_YET", "IN_PROGRESS", "DONE"]
+            }
+          },
+          {
+            "name": "start_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by start date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731,1706937731", "type": "string" }
+          },
+          {
+            "name": "end_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by end date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731", "type": "string" }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "The field to sort the results by",
+            "schema": {
+              "default": "created_at",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "asc",
+            "required": false,
+            "in": "query",
+            "description": "Sort order: true for ascending, false for descending",
+            "schema": { "default": false, "example": true, "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SearchProjectResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Search and filter projects",
+        "tags": ["Projects"]
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "patch": {
+        "operationId": "ProjectController_updateProject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Update an existing project",
+        "tags": ["Projects"]
+      },
+      "get": {
+        "operationId": "ProjectController_getProjectById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/ProjectResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Get project details by ID",
+        "tags": ["Projects"]
+      },
+      "delete": {
+        "operationId": "ProjectController_deleteProject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AppResponseDTO" }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Delete a project",
+        "tags": ["Projects"]
+      }
+    },
+    "/api/v1/projects/{id}/tasks": {
+      "post": {
+        "operationId": "ProjectTaskController_createProjectTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the project",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectTaskRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskAttachmentsUploadResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Create a new task within a project",
+        "tags": ["Project Tasks"]
+      },
+      "get": {
+        "operationId": "ProjectTaskController_searchProjectTasks",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The ID of the project",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SearchProjectTaskResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Search and filter tasks within a specific project",
+        "tags": ["Project Tasks"]
+      }
+    },
+    "/api/v1/tasks/{id}": {
+      "patch": {
+        "operationId": "TaskController_updateTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The unique ID of the task",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateTaskRequestDTO" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Update task details",
+        "tags": ["Tasks"]
+      },
+      "get": {
+        "operationId": "TaskController_getTaskById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Get a specific task by ID",
+        "tags": ["Tasks"]
+      },
+      "delete": {
+        "operationId": "TaskController_deleteTask",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": { "type": "number" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AppResponseDTO" }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Delete a task",
+        "tags": ["Tasks"]
+      }
+    },
+    "/api/v1/tasks/{id}/attachments/bulk": {
+      "post": {
+        "description": "Call this before uploading files to S3. Returns S3 PUT URLs for the mobile app.",
+        "operationId": "TaskController_bulkAddTaskAttchments",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "The task ID to attach files to",
+            "schema": { "type": "number" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkAddTaskAttachmentsRequestDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/TaskAttachmentsUploadResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "Request presigned URLs for bulk file uploads",
+        "tags": ["Tasks"]
+      }
+    }
+  },
+  "info": {
+    "title": "TaskFlow Api",
+    "description": "API description",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "schemas": {
+      "SignUpRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "example": "user@example.com" },
+          "password": { "type": "string", "example": "StrongP@ssw0rd" },
+          "first_name": { "type": "string", "example": "John" },
+          "last_name": { "type": "string", "example": "Doe" },
+          "phone_number": { "type": "string", "example": "+1234567890" },
+          "date_of_birth": {
+            "format": "date-time",
+            "type": "string",
+            "example": 915148800
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "first_name",
+          "last_name",
+          "phone_number",
+          "date_of_birth"
+        ]
+      },
+      "AppResponseDTO": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" },
+          "data": { "type": "object", "nullable": true }
+        },
+        "required": ["success", "message", "data"]
+      },
+      "TokenResponseDTO": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+            "description": "JWT access token"
+          },
+          "refresh_token": {
+            "type": "string",
+            "example": "dGhpc2lzYXJlZnJlc2h0b2tlbg==",
+            "description": "JWT refresh token"
+          }
+        },
+        "required": ["access_token", "refresh_token"]
+      },
+      "VerifyOtpRequestDTO": {
+        "type": "object",
+        "properties": {
+          "otp": {
+            "type": "string",
+            "example": "123456",
+            "description": "One-time password code"
+          }
+        },
+        "required": ["otp"]
+      },
+      "LogInRequestDTO": {
+        "type": "object",
+        "properties": {
+          "email": { "type": "string", "example": "user@example.com" },
+          "password": { "type": "string", "example": "StrongP@ssw0rd" }
+        },
+        "required": ["email", "password"]
+      },
+      "ProjectStatus": {
+        "type": "string",
+        "enum": ["NOT_YET", "IN_PROGRESS", "DONE"],
+        "description": "Current status of the project"
+      },
+      "ProjectResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "example": 1,
+            "description": "The unique identifier of the project"
+          },
+          "name": {
+            "type": "string",
+            "example": "Mobile App Revamp",
+            "description": "Name of the project"
+          },
+          "description": {
+            "type": "string",
+            "example": "A project to update the UI/UX of our main app.",
+            "description": "A brief description of the project"
+          },
+          "owner_id": {
+            "type": "number",
+            "example": 123,
+            "description": "The ID of the user who owns the project"
+          },
+          "status": {
+            "description": "Current status of the project",
+            "allOf": [{ "$ref": "#/components/schemas/ProjectStatus" }]
+          },
+          "start_date": {
+            "type": "number",
+            "example": 1704345731,
+            "description": "Project start date as a Unix timestamp (seconds)"
+          },
+          "end_date": {
+            "type": "number",
+            "example": 1706937731,
+            "description": "Project end date as a Unix timestamp (seconds)"
+          },
+          "created_at": {
+            "type": "number",
+            "example": 1704067200,
+            "description": "Creation timestamp"
+          },
+          "updated_at": {
+            "type": "number",
+            "example": 1704153600,
+            "description": "Last update timestamp"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "owner_id",
+          "status",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "AddProjectRequestDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the project",
+            "example": "Mobile App Redesign"
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the project",
+            "example": "Revamping the user interface for the core mobile application."
+          },
+          "start_date": {
+            "type": "number",
+            "description": "Project start date in Unix timestamp (seconds)",
+            "example": 1704345731
+          },
+          "end_date": {
+            "type": "number",
+            "description": "Project end date in Unix timestamp (seconds)",
+            "example": 1706937731
+          }
+        },
+        "required": ["name"]
+      },
+      "UpdateProjectRequestDTO": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the project",
+            "example": "Mobile App Redesign"
+          },
+          "description": {
+            "type": "string",
+            "description": "A brief description of the project",
+            "example": "Revamping the user interface for the core mobile application."
+          },
+          "start_date": {
+            "type": "number",
+            "description": "Project start date in Unix timestamp (seconds)",
+            "example": 1704345731
+          },
+          "end_date": {
+            "type": "number",
+            "description": "Project end date in Unix timestamp (seconds)",
+            "example": 1706937731
+          },
+          "status": {
+            "type": "string",
+            "enum": ["NOT_YET", "IN_PROGRESS", "DONE"],
+            "description": "Update the current status of the project",
+            "example": "NOT_YET"
+          }
+        }
+      },
+      "SearchProjectResponseDTO": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "description": "List of projects matching the search criteria",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProjectResponseDTO" }
+          }
+        },
+        "required": ["projects"]
+      },
+      "TaskAttachmentsUploadResponseDTO": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateProjectTaskRequestDTO": { "type": "object", "properties": {} },
+      "SearchProjectTaskResponseDTO": { "type": "object", "properties": {} },
+      "TaskResponseDTO": { "type": "object", "properties": {} },
+      "UpdateTaskRequestDTO": { "type": "object", "properties": {} },
+      "BulkAddTaskAttachmentsRequestDTO": { "type": "object", "properties": {} }
+    }
+  }
+}

@@ -27,8 +27,6 @@ export class SearchProjectTaskInput {
   @PGFilterMetaData({ column: 'end_date' })
   endDate?: PGQueryValue<Date>;
 
-  // Sort and Asc are usually handled in ORDER BY,
-  // so they don't need PG metadata for the WHERE clause
   sort: string;
   asc: boolean;
 
