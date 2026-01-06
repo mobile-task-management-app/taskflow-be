@@ -11,6 +11,7 @@ import {
   buildUpdateSetClause,
 } from 'src/common/utils/pg.utils';
 import { UpdateProject } from '../models/update_project';
+import { ProjectSummary } from '../models/project_summary';
 
 @Injectable()
 export class ProjectRepository {
@@ -172,6 +173,35 @@ export class ProjectRepository {
     `;
     const { rows } = await this.pgPool.query(sql, [...args]);
     return plainToInstance(Project, rows, {
+      excludeExtraneousValues: true,
+    });
+  }
+  async findProjectSummariesByOwnerId(ownerId: number): Promise<Project[]> {
+    const sql = `
+      SELECT
+        p.id,
+        MAX(p.name) AS name,
+        MAX(p.description) AS description,
+        MAX(p.owner_id) AS owner_id,
+        MAX(p.status) AS status,
+        MAX(p.start_date) AS start_date,
+        MAX(p.end_date) AS end_date,
+        MAX(p.created_at) AS created_at,
+        MAX(p.updated_at) AS updated_at,
+        COUNT(t.id) FILTER (WHERE t.status = 'TODO') AS number_of_todo_tasks,
+        COUNT(t.id) FILTER (WHERE t.status = 'IN_PROGRESS') AS num_of_in_progress_tasks,
+        COUNT(t.id) FILTER (WHERE t.status = 'DONE') AS number_of_done_tasks,
+        COUNT(t.id) FILTER (WHERE t.status = 'CANCELLED') AS number_of_cancelled_tasks,
+        COUNT(t.id) AS total_tasks
+      FROM projects p
+      INNER JOIN tasks t
+      ON 1=1
+      AND p.id = t.project_id
+      WHERE p.owner_id = $1
+      GROUP BY p.id 
+    `;
+    const { rows } = await this.pgPool.query(sql, [ownerId]);
+    return plainToInstance(ProjectSummary, rows, {
       excludeExtraneousValues: true,
     });
   }

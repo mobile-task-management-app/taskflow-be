@@ -9,6 +9,7 @@ import { SearchProjectOutput } from './outputs/search_project.output';
 import { UpdateProjectInput } from './inputs/update_project.input';
 import { UpdateProjectOutput } from './outputs/update_project.output';
 import { GetProjectByIdOutput } from './outputs/get_project_by_id.output';
+import { ProjectSummaryOutput } from './outputs/project_summary.output';
 
 @Injectable()
 export class ProjectService {
@@ -77,5 +78,15 @@ export class ProjectService {
       throw new HttpException('permission denined', HttpStatus.FORBIDDEN);
     }
     await this.projectRepository.deleteProject(id);
+  }
+
+  async getUserProjectSummaries(
+    user: UserContextType,
+  ): Promise<ProjectSummaryOutput[]> {
+    const projectSummaries =
+      await this.projectRepository.findProjectSummariesByOwnerId(user.id);
+    return projectSummaries.map(
+      (projectSummary) => new ProjectSummaryOutput({ ...projectSummary }),
+    );
   }
 }

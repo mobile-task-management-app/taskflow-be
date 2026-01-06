@@ -261,6 +261,26 @@ paths:
       summary: Delete a project
       tags:
         - Projects
+  /api/v1/projects/summaries:
+    get:
+      operationId: ProjectController_getUserProjectSummaries
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/AppResponseDTO'
+                  - properties:
+                      data:
+                        $ref: '#/components/schemas/GetUserProjectSummariesRequestDTO'
+      security:
+        - bearer: []
+      summary: Get project summaries for a user
+      tags:
+        - Projects
   /api/v1/projects/{id}/tasks:
     post:
       operationId: ProjectTaskController_createProjectTask
@@ -659,6 +679,76 @@ components:
             $ref: '#/components/schemas/ProjectResponseDTO'
       required:
         - projects
+    ProjectSummaryResponseDTO:
+      type: object
+      properties:
+        id:
+          type: number
+          example: 1
+          description: The unique identifier of the project
+        name:
+          type: string
+          example: Mobile App Revamp
+          description: Name of the project
+        description:
+          type: string
+          example: A project to update the UI/UX of our main app.
+          description: A brief description of the project
+        owner_id:
+          type: number
+          example: 123
+          description: The ID of the user who owns the project
+        status:
+          description: Current status of the project
+          allOf:
+            - $ref: '#/components/schemas/ProjectStatus'
+        start_date:
+          type: number
+          example: 1704345731
+          description: Project start date as a Unix timestamp (seconds)
+        end_date:
+          type: number
+          example: 1706937731
+          description: Project end date as a Unix timestamp (seconds)
+        created_at:
+          type: number
+          example: 1704067200
+          description: Creation timestamp
+        updated_at:
+          type: number
+          example: 1704153600
+          description: Last update timestamp
+        number_of_todo_tasks:
+          type: number
+        num_of_in_progress_tasks:
+          type: number
+        number_of_done_tasks:
+          type: number
+        number_of_cancelled_tasks:
+          type: number
+        total_tasks:
+          type: number
+      required:
+        - id
+        - name
+        - owner_id
+        - status
+        - created_at
+        - updated_at
+        - number_of_todo_tasks
+        - num_of_in_progress_tasks
+        - number_of_done_tasks
+        - number_of_cancelled_tasks
+        - total_tasks
+    GetUserProjectSummariesRequestDTO:
+      type: object
+      properties:
+        project_summaries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectSummaryResponseDTO'
+      required:
+        - project_summaries
     TaskAttachmentsUploadResponseDTO:
       type: object
       properties: {}

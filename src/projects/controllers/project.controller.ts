@@ -16,7 +16,6 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiBody,
-  ApiBearerAuth,
   ApiParam,
 } from '@nestjs/swagger';
 import { AddProjectRequestDTO } from '../dtos/add_project.dto';
@@ -34,9 +33,10 @@ import {
   getAppResponseSchema,
   RegisterAppResponseModels,
 } from 'src/common/utils/swagger.util';
+import { GetUserProjectSummariesResponseDTO } from '../dtos/get_user_project_summaries.dto';
+import { ProjectSummaryResponseDTO } from '../dtos/project_summary.dto';
 
 @ApiTags('Projects')
-@ApiBearerAuth() // Indicates that JWT is required for these endpoints
 @Controller('/projects')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
@@ -85,6 +85,26 @@ export class ProjectController {
       success: true,
       message: 'update project success',
       data: new ProjectResponseDTO(output),
+    });
+  }
+
+  @Get('/summaries')
+  @ApiOperation({ summary: 'Get project summaries for a user' })
+  @RegisterAppResponseModels(GetUserProjectSummariesResponseDTO)
+  @ApiOkResponse({
+    schema: getAppResponseSchema(GetUserProjectSummariesResponseDTO),
+  })
+  @HttpCode(HttpStatus.OK)
+  async getUserProjectSummaries(@CurrentUserContext() user: UserContextType) {
+    const output = await this.projectService.getUserProjectSummaries(user);
+    return new AppResponseDTO({
+      success: true,
+      message: 'get project summaries success',
+      data: new GetUserProjectSummariesResponseDTO({
+        projectSummaries: output.map(
+          (projectSummary) => new ProjectSummaryResponseDTO(projectSummary),
+        ),
+      }),
     });
   }
 

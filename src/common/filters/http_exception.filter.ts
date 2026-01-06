@@ -17,7 +17,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     const status = exception.getStatus();
-
+    this.logger.error(`HTTP Exception: ${exception.message}`, exception.stack);
     const errorResponse = new AppResponseDTO({
       success: false,
       message: exception.message || 'error',
