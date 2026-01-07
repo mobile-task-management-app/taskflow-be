@@ -13,6 +13,7 @@ import { CreateTask } from '../models/create_task';
 import { UpdateTask } from '../models/update_task';
 import { SearchProjectTaskInput } from '../services/inputs/search_project_task.input';
 import { TaskAttachment } from '../models/task_attachment';
+import { SearchTaskInput } from '../services/inputs/search_task.input';
 
 @Injectable()
 export class TaskRepository {
@@ -136,7 +137,9 @@ export class TaskRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
-  async searchProjectTask(cond: SearchProjectTaskInput): Promise<Task[]> {
+  async searchTasks(
+    cond: SearchProjectTaskInput | SearchTaskInput,
+  ): Promise<Task[]> {
     const [whereClause, args] = buildPGFilterCondition(cond);
 
     const sql = `

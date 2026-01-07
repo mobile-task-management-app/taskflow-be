@@ -173,7 +173,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Create a new project",
         "tags": ["Projects"]
       },
@@ -244,7 +243,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Search and filter projects",
         "tags": ["Projects"]
       }
@@ -291,7 +289,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Update an existing project",
         "tags": ["Projects"]
       },
@@ -326,7 +323,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Get project details by ID",
         "tags": ["Projects"]
       },
@@ -350,7 +346,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Delete a project",
         "tags": ["Projects"]
       }
@@ -370,7 +365,7 @@
                     {
                       "properties": {
                         "data": {
-                          "$ref": "#/components/schemas/GetUserProjectSummariesRequestDTO"
+                          "$ref": "#/components/schemas/GetUserProjectSummariesResponseDTO"
                         }
                       }
                     }
@@ -380,7 +375,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Get project summaries for a user",
         "tags": ["Projects"]
       }
@@ -428,7 +422,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Create a new task within a project",
         "tags": ["Project Tasks"]
       },
@@ -441,6 +434,62 @@
             "in": "path",
             "description": "The ID of the project",
             "schema": { "type": "number" }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter tasks by their current status",
+            "schema": {
+              "type": "string",
+              "enum": ["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "description": "Filter tasks by their priority",
+            "schema": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category ID",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "start_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by start date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731,1706937731", "type": "string" }
+          },
+          {
+            "name": "end_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by end date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731", "type": "string" }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "The field to sort the results by",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string"
+            }
+          },
+          {
+            "name": "asc",
+            "required": false,
+            "in": "query",
+            "description": "Sort order: true for ascending, false for descending",
+            "schema": { "default": false, "example": false, "type": "boolean" }
           }
         ],
         "responses": {
@@ -464,7 +513,6 @@
             }
           }
         },
-        "security": [{ "bearer": [] }],
         "summary": "Search and filter tasks within a specific project",
         "tags": ["Project Tasks"]
       }
@@ -620,6 +668,146 @@
         },
         "security": [{ "bearer": [] }],
         "summary": "Request presigned URLs for bulk file uploads",
+        "tags": ["Tasks"]
+      }
+    },
+    "/api/v1/tasks": {
+      "get": {
+        "operationId": "TaskController_searchUserTasks",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filter tasks by their current status",
+            "schema": {
+              "type": "string",
+              "enum": ["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]
+            }
+          },
+          {
+            "name": "priority",
+            "required": false,
+            "in": "query",
+            "description": "Filter tasks by their priority",
+            "schema": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] }
+          },
+          {
+            "name": "category_id",
+            "required": false,
+            "in": "query",
+            "description": "Filter by category ID",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "start_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by start date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731,1706937731", "type": "string" }
+          },
+          {
+            "name": "end_date",
+            "required": false,
+            "in": "query",
+            "description": "Filter by end date. Supports single Unix timestamp or range (min,max)",
+            "schema": { "example": "1704345731", "type": "string" }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "description": "The field to sort the results by",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string"
+            }
+          },
+          {
+            "name": "asc",
+            "required": false,
+            "in": "query",
+            "description": "Sort order: true for ascending, false for descending",
+            "schema": { "default": false, "example": false, "type": "boolean" }
+          },
+          {
+            "description": "Filter tasks by their current status",
+            "required": false,
+            "name": "status",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "description": "Filter tasks by their priority",
+            "required": false,
+            "name": "priority",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "category_id",
+            "description": "Filter by category ID",
+            "required": false,
+            "in": "query",
+            "schema": { "type": "number" }
+          },
+          {
+            "name": "start_date",
+            "description": "Filter by start date. Supports single Unix timestamp or range (min,max)",
+            "required": false,
+            "in": "query",
+            "schema": { "example": "1704345731,1706937731", "type": "string" }
+          },
+          {
+            "name": "end_date",
+            "description": "Filter by end date. Supports single Unix timestamp or range (min,max)",
+            "required": false,
+            "in": "query",
+            "schema": { "example": "1704345731", "type": "string" }
+          },
+          {
+            "description": "The field to sort the results by",
+            "required": false,
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "default": "created_at",
+              "example": "created_at",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort order: true for ascending, false for descending",
+            "required": false,
+            "name": "asc",
+            "in": "query",
+            "schema": { "default": false, "example": false, "type": "boolean" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/AppResponseDTO" },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/SearchTaskResponseDTO"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [{ "bearer": [] }],
+        "summary": "List all tasks for the current user",
         "tags": ["Tasks"]
       }
     }
@@ -858,17 +1046,6 @@
           }
         }
       },
-      "SearchProjectResponseDTO": {
-        "type": "object",
-        "properties": {
-          "projects": {
-            "description": "List of projects matching the search criteria",
-            "type": "array",
-            "items": { "$ref": "#/components/schemas/ProjectResponseDTO" }
-          }
-        },
-        "required": ["projects"]
-      },
       "ProjectSummaryResponseDTO": {
         "type": "object",
         "properties": {
@@ -936,7 +1113,7 @@
           "total_tasks"
         ]
       },
-      "GetUserProjectSummariesRequestDTO": {
+      "GetUserProjectSummariesResponseDTO": {
         "type": "object",
         "properties": {
           "project_summaries": {
@@ -948,15 +1125,208 @@
         },
         "required": ["project_summaries"]
       },
+      "SearchProjectResponseDTO": {
+        "type": "object",
+        "properties": {
+          "projects": {
+            "description": "List of projects matching the search criteria",
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/ProjectResponseDTO" }
+          }
+        },
+        "required": ["projects"]
+      },
+      "TaskStatus": {
+        "type": "string",
+        "enum": ["TODO", "IN_PROGRESS", "DONE", "CANCELLED"]
+      },
+      "TaskPriority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH"] },
+      "TaskAttachmentResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "name": { "type": "string" },
+          "size": { "type": "number" },
+          "extension": { "type": "string" },
+          "download_url": { "type": "string" },
+          "upload_url": { "type": "string" }
+        },
+        "required": ["id", "name", "size", "extension"]
+      },
       "TaskAttachmentsUploadResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "owner_id": { "type": "number" },
+          "title": { "type": "string" },
+          "project_id": { "type": "number" },
+          "status": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskStatus" }]
+          },
+          "priority": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskPriority" }]
+          },
+          "category_ids": { "type": "array", "items": { "type": "number" } },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAttachmentResponseDTO"
+            }
+          },
+          "start_date": {
+            "type": "number",
+            "example": 1704345731,
+            "description": "Project start date as a Unix timestamp (seconds)"
+          },
+          "end_date": {
+            "type": "number",
+            "example": 1706937731,
+            "description": "Project end date as a Unix timestamp (seconds)"
+          },
+          "description": { "type": "string" },
+          "created_at": { "format": "date-time", "type": "string" },
+          "updated_at": { "format": "date-time", "type": "string" }
+        },
+        "required": [
+          "id",
+          "owner_id",
+          "title",
+          "project_id",
+          "status",
+          "priority",
+          "category_ids",
+          "attachments",
+          "description",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "CreateTaskAttachmentRequestDTO": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "size": { "type": "number" },
+          "extension": { "type": "string" }
+        },
+        "required": ["name", "size", "extension"]
+      },
+      "CreateProjectTaskRequestDTO": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "priority": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskPriority" }]
+          },
+          "status": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskStatus" }]
+          },
+          "category_ids": { "type": "array", "items": { "type": "number" } },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateTaskAttachmentRequestDTO"
+            }
+          },
+          "start_date": { "type": "number" },
+          "end_date": { "type": "number" },
+          "description": { "type": "string" }
+        },
+        "required": [
+          "title",
+          "priority",
+          "status",
+          "category_ids",
+          "attachments"
+        ]
+      },
+      "TaskResponseDTO": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "number" },
+          "owner_id": { "type": "number" },
+          "title": { "type": "string" },
+          "project_id": { "type": "number" },
+          "status": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskStatus" }]
+          },
+          "priority": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskPriority" }]
+          },
+          "category_ids": { "type": "array", "items": { "type": "number" } },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskAttachmentResponseDTO"
+            }
+          },
+          "start_date": {
+            "type": "number",
+            "example": 1704345731,
+            "description": "Project start date as a Unix timestamp (seconds)"
+          },
+          "end_date": {
+            "type": "number",
+            "example": 1706937731,
+            "description": "Project end date as a Unix timestamp (seconds)"
+          },
+          "description": { "type": "string" },
+          "created_at": { "format": "date-time", "type": "string" },
+          "updated_at": { "format": "date-time", "type": "string" }
+        },
+        "required": [
+          "id",
+          "owner_id",
+          "title",
+          "project_id",
+          "status",
+          "priority",
+          "category_ids",
+          "attachments",
+          "description",
+          "created_at",
+          "updated_at"
+        ]
+      },
+      "SearchProjectTaskResponseDTO": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TaskResponseDTO" }
+          }
+        },
+        "required": ["tasks"]
+      },
+      "UpdateTaskRequestDTO": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "priority": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskPriority" }]
+          },
+          "status": {
+            "allOf": [{ "$ref": "#/components/schemas/TaskStatus" }]
+          },
+          "category_ids": { "type": "array", "items": { "type": "number" } },
+          "start_date": { "type": "number" },
+          "end_date": { "type": "number" },
+          "description": { "type": "string" }
+        }
+      },
+      "BulkAddTaskAttachmentsRequestDTO": {
         "type": "object",
         "properties": {}
       },
-      "CreateProjectTaskRequestDTO": { "type": "object", "properties": {} },
-      "SearchProjectTaskResponseDTO": { "type": "object", "properties": {} },
-      "TaskResponseDTO": { "type": "object", "properties": {} },
-      "UpdateTaskRequestDTO": { "type": "object", "properties": {} },
-      "BulkAddTaskAttachmentsRequestDTO": { "type": "object", "properties": {} }
+      "SearchTaskResponseDTO": {
+        "type": "object",
+        "properties": {
+          "tasks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TaskResponseDTO" }
+          }
+        },
+        "required": ["tasks"]
+      }
     }
   }
 }

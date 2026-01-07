@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -17,6 +18,7 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { TaskService } from '../services/task.service';
 import { UpdateTaskRequestDTO } from '../dtos/update_task.dto';
@@ -30,6 +32,10 @@ import {
   getAppResponseSchema,
   RegisterAppResponseModels,
 } from 'src/common/utils/swagger.util';
+import {
+  SearchTaskRequestDTO,
+  SearchTaskResponseDTO,
+} from '../dtos/search_task.dto';
 
 @ApiTags('Tasks')
 @ApiBearerAuth()
@@ -132,6 +138,31 @@ export class TaskController {
       success: true,
       message: 'bulk add task attachments success',
       data: new TaskAttachmentsUploadResponseDTO(output),
+    });
+  }
+
+  @Get('')
+  @ApiOperation({ summary: 'List all tasks for the current user' })
+  @RegisterAppResponseModels(SearchTaskResponseDTO)
+  @ApiQuery({ type: SearchTaskRequestDTO })
+  @ApiOkResponse({
+    schema: getAppResponseSchema(SearchTaskResponseDTO),
+  })
+  @HttpCode(HttpStatus.OK)
+  async searchUserTasks(
+    @Query() dto: SearchTaskRequestDTO,
+    @CurrentUserContext() user: UserContextType,
+  ) {
+    const tasks = await this.taskService.searchTask(
+      dto.toSearchTaskInput(),
+      user,
+    );
+    return new AppResponseDTO({
+      success: true,
+      message: 'list user tasks success',
+      data: new SearchTaskResponseDTO({
+        tasks: tasks.map((task) => new TaskResponseDTO(task)),
+      }),
     });
   }
 }

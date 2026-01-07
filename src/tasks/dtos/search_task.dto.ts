@@ -1,4 +1,6 @@
 import { Expose, Transform, Type } from 'class-transformer';
+import { TaskResponseDTO } from './task.dto';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsBoolean,
   IsEnum,
@@ -6,15 +8,13 @@ import {
   IsOptional,
   IsString,
 } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { PGQueryValue } from 'src/common/queries/pg.query';
 import { parseRangeInput } from 'src/common/utils/queries.util';
-import { TaskPriority } from 'src/tasks/models/task_priority';
-import { TaskStatus } from 'src/tasks/models/task_status';
-import { SearchProjectTaskInput } from '../services/inputs/search_project_task.input';
-import { TaskResponseDTO } from './task.dto';
+import { TaskPriority } from '../models/task_priority';
+import { TaskStatus } from '../models/task_status';
+import { SearchTaskInput } from '../services/inputs/search_task.input';
 
-export class SearchProjectTaskRequestDTO {
+export class SearchTaskRequestDTO {
   @ApiPropertyOptional({
     enum: TaskStatus,
     description: 'Filter tasks by their current status',
@@ -88,24 +88,23 @@ export class SearchProjectTaskRequestDTO {
   @IsBoolean()
   asc: boolean = false;
 
-  constructor(args: Partial<SearchProjectTaskRequestDTO>) {
+  constructor(args: Partial<SearchTaskRequestDTO>) {
     Object.assign(this, args);
   }
 
-  toSearchProjectTaskInput(projectId: number) {
-    return new SearchProjectTaskInput({
+  toSearchTaskInput() {
+    return new SearchTaskInput({
       ...this,
-      projectId: projectId,
     });
   }
 }
 
-export class SearchProjectTaskResponseDTO {
+export class SearchTaskResponseDTO {
   @Expose()
   @Type(() => TaskResponseDTO)
   @ApiProperty({ type: [TaskResponseDTO] })
   tasks: TaskResponseDTO[];
-  constructor(args: Partial<SearchProjectTaskResponseDTO>) {
+  constructor(args: Partial<SearchTaskResponseDTO>) {
     Object.assign(this, args);
   }
 }

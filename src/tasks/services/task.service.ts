@@ -6,6 +6,7 @@ import { TaskOutput } from './outputs/task.output';
 import { BulkAddTaskAttachmentInput } from './inputs/bulk_add_task_attachments.input';
 import { S3StorageService } from 'src/storage/services/s3_storage.service';
 import { TaskAttachmentOutput } from './outputs/task_attachment.output';
+import { SearchTaskInput } from './inputs/search_task.input';
 
 @Injectable()
 export class TaskService {
@@ -99,5 +100,14 @@ export class TaskService {
       ...task,
       attachments,
     });
+  }
+
+  async searchTask(
+    input: SearchTaskInput,
+    user: UserContextType,
+  ): Promise<TaskOutput[]> {
+    input.ownerId = user.id;
+    const tasks = await this.taskRepo.searchTasks(input);
+    return tasks.map((task) => new TaskOutput(task));
   }
 }

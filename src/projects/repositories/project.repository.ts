@@ -194,7 +194,7 @@ export class ProjectRepository {
         COUNT(t.id) FILTER (WHERE t.status = 'CANCELLED') AS number_of_cancelled_tasks,
         COUNT(t.id) AS total_tasks
       FROM projects p
-      INNER JOIN tasks t
+      LEFT JOIN tasks t
       ON 1=1
       AND p.id = t.project_id
       WHERE p.owner_id = $1

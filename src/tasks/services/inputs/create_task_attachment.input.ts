@@ -14,7 +14,7 @@ export class CreateTaskAttachmentInput {
     return new TaskAttachment({
       ...this,
       id: attachmentId,
-      storageKey: `tasks/${taskId}/attachments/${attachmentId}/${taskId}_${attachmentId}`,
+      storageKey: `tasks/${taskId}/attachments/${attachmentId}/${taskId}_${attachmentId}.${this.extension}`,
     });
   }
 }

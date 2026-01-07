@@ -80,7 +80,7 @@ export class ProjectTaskService {
     if (project.ownerId !== user.id) {
       throw new HttpException('permission denied', HttpStatus.FORBIDDEN);
     }
-    const tasks = await this.taskRepo.searchProjectTask(input);
+    const tasks = await this.taskRepo.searchTasks(input);
     return tasks.map((task) => new TaskOutput(task));
   }
 }

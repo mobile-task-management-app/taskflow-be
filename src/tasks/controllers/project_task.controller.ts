@@ -16,6 +16,7 @@ import {
   ApiBody,
   ApiBearerAuth,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CurrentUserContext } from 'src/common/decorators/user_context.decorator';
 import { CreateProjectTaskRequestDTO } from '../dtos/create_project_task.dto';
@@ -34,7 +35,6 @@ import {
 } from 'src/common/utils/swagger.util';
 
 @ApiTags('Project Tasks')
-@ApiBearerAuth()
 @Controller('projects/:id/tasks')
 export class ProjectTaskController {
   constructor(private readonly projectTaskService: ProjectTaskService) {}
