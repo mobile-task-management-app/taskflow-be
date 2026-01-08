@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import {
   IsString,
   IsNotEmpty,
@@ -52,6 +52,10 @@ export class CreateProjectTaskRequestDTO {
   @IsDate()
   @Type(() => Date) // Converts string input from JSON to Date object
   @ApiPropertyOptional({ name: 'start_date', type: Number })
+  @Transform(({ value }) => (value ? new Date(Number(value) * 1000) : value), {
+    toClassOnly: true,
+  })
+  @IsDate()
   startDate?: Date;
 
   @Expose({ name: 'end_date' })
@@ -59,6 +63,10 @@ export class CreateProjectTaskRequestDTO {
   @IsDate()
   @Type(() => Date)
   @ApiPropertyOptional({ name: 'end_date', type: Number })
+  @Transform(({ value }) => (value ? new Date(Number(value) * 1000) : value), {
+    toClassOnly: true,
+  })
+  @IsDate()
   endDate?: Date;
 
   @Expose()
