@@ -8,9 +8,11 @@ import { TasksModule } from './tasks/tasks.module';
 import { MailModule } from './mail/mail.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
 import { StorageModule } from './storage/storage.module';
+import { SentryModule } from '@sentry/nestjs/setup';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     UsersModule,
     CommonModule,
     AuthModule,

@@ -10,6 +10,7 @@ import { AllExceptionFilter } from './filters/all_exception.filter';
 import { HttpExceptionFilter } from './filters/http_exception.filter';
 import { TransformResponseInterceptor } from './interceptors/transform_response.interceptor';
 import { PgService } from './pg/pg.service';
+import { SentryCaptureFilter } from './filters/sentry_capture.filter';
 
 @Global()
 @Module({
@@ -27,6 +28,10 @@ import { PgService } from './pg/pg.service';
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: SentryCaptureFilter,
     },
     {
       provide: APP_FILTER,
