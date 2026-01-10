@@ -89,6 +89,34 @@ export class UserConfirmSignRepository {
     });
   }
 
+  async findByEmail(email: string): Promise<UserConfirmSignUp | null> {
+    const sql = `
+      SELECT
+        id,
+        first_name,
+        last_name,
+        email,
+        password,
+        phone_number,
+        date_of_birth,
+        otp,
+        expire_at,
+        created_at,
+        updated_at
+      FROM user_confirm_sign_up
+      WHERE email = $1
+      LIMIT 1
+    `;
+
+    const { rows } = await this.pgPool.query(sql, [email]);
+
+    if (rows.length === 0) return null;
+
+    return plainToInstance(UserConfirmSignUp, rows[0], {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async deleteByOtp(otp: string, client?: PoolClient): Promise<void> {
     const executor = client ?? this.pgPool;
 

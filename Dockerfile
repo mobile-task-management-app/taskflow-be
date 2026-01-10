@@ -37,6 +37,8 @@ RUN pnpm install --frozen-lockfile --prod
 # Copy built application from builder stage
 COPY --from=builder /app/dist ./dist
 
+COPY --from=builder /app/templates ./templates
+
 # Copy instrument.ts if needed (for Sentry)
 
 # Expose port

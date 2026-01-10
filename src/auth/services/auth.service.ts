@@ -54,9 +54,18 @@ export class AuthService {
     return token;
   }
   async signUp(input: SignUpInput) {
-    const existUser = await this.userRepo.findUserByEmail(input.email);
+    const [existUser, existOtp] = await Promise.all([
+      this.userRepo.findUserByEmail(input.email),
+      this.userConfirmRepo.findByEmail(input.email),
+    ]);
     if (existUser) {
       throw new HttpException('user email exist', HttpStatus.BAD_REQUEST);
+    }
+    if (existOtp) {
+      throw new HttpException(
+        'pending otp verification exist for this email',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const otp = this.genOtp();
     const createUserConfirm = input.toCreateUserConfirmSignUp({
