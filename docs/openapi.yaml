@@ -997,11 +997,9 @@ components:
         description:
           type: string
         created_at:
-          format: date-time
-          type: string
+          type: number
         updated_at:
-          format: date-time
-          type: string
+          type: number
       required:
         - id
         - owner_id
@@ -1094,11 +1092,9 @@ components:
         description:
           type: string
         created_at:
-          format: date-time
-          type: string
+          type: number
         updated_at:
-          format: date-time
-          type: string
+          type: number
       required:
         - id
         - owner_id

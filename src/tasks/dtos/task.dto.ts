@@ -78,7 +78,7 @@ export class TaskResponseDTO {
       toPlainOnly: true,
     },
   )
-  @ApiProperty({ name: 'created_at' })
+  @ApiProperty({ name: 'created_at', type: Number })
   createdAt: Date;
 
   @Expose({ name: 'updated_at' })
@@ -89,7 +89,7 @@ export class TaskResponseDTO {
       toPlainOnly: true,
     },
   )
-  @ApiProperty({ name: 'updated_at' })
+  @ApiProperty({ name: 'updated_at', type: Number })
   updatedAt: Date;
 
   constructor(args: Partial<TaskResponseDTO>) {

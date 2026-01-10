@@ -1184,8 +1184,8 @@
             "description": "Project end date as a Unix timestamp (seconds)"
           },
           "description": { "type": "string" },
-          "created_at": { "format": "date-time", "type": "string" },
-          "updated_at": { "format": "date-time", "type": "string" }
+          "created_at": { "type": "number" },
+          "updated_at": { "type": "number" }
         },
         "required": [
           "id",
@@ -1270,8 +1270,8 @@
             "description": "Project end date as a Unix timestamp (seconds)"
           },
           "description": { "type": "string" },
-          "created_at": { "format": "date-time", "type": "string" },
-          "updated_at": { "format": "date-time", "type": "string" }
+          "created_at": { "type": "number" },
+          "updated_at": { "type": "number" }
         },
         "required": [
           "id",

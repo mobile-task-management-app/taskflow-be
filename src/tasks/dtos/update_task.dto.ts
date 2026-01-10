@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer';
+import { Expose, Transform, Type } from 'class-transformer';
 import {
   IsArray,
   IsDate,
@@ -42,6 +42,10 @@ export class UpdateTaskRequestDTO {
   @IsOptional()
   @IsDate()
   @Type(() => Date) // Converts string input from JSON to Date object
+  @Transform(({ value }) => (value ? new Date(Number(value) * 1000) : value), {
+    toClassOnly: true,
+  })
+  @IsDate()
   @ApiPropertyOptional({ name: 'start_date', type: Number })
   startDate?: Date;
 
@@ -49,6 +53,10 @@ export class UpdateTaskRequestDTO {
   @IsOptional()
   @IsDate()
   @Type(() => Date)
+  @Transform(({ value }) => (value ? new Date(Number(value) * 1000) : value), {
+    toClassOnly: true,
+  })
+  @IsDate()
   @ApiPropertyOptional({ name: 'end_date', type: Number })
   endDate?: Date;
 
